@@ -1,0 +1,22 @@
+{
+  "name": "playwrighttypescriptframework",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "testNew": "npx playwright test sampleTest_updateResultOnNewSuite.spec.ts --workers=1",
+    "testSame": "npx playwright test sampleTest_updateResultOnSameSuite.spec.ts --workers=1",
+    "uitest":"npx playwright test --ui"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.45.1",
+    "@types/node": "^20.14.10"
+  },
+  "dependencies": {
+    "axios": "^1.13.5",
+    "dotenv": "^16.4.5"
+  }
+}
