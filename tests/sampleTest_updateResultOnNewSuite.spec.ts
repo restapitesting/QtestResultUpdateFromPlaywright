@@ -164,25 +164,6 @@ async function createTestLog(runId: number, status: number, note = '') {
   );
 }
 
-
-
-// test.beforeAll(async () => {
-
-//   PROJECT_ID = await fetchProjectId();
-//   console.log(`Resolved Project ID: ${PROJECT_ID}`);
-
-//   RELEASE_ID = await fetchReleaseId(PROJECT_ID);
-//   console.log(`Resolved Release ID: ${RELEASE_ID}`);
-
-//   moduleId = await fetchModuleId();
-
-//   await fetchTestCases(moduleId);
-
-//   cycleId = await createTestCycle();
-//   suiteId = await createTestSuite(cycleId);
-
-//   console.log('Cycle, Suite & Test Case Map Ready');
-// });
 test.beforeAll(async () => {
 
   PROJECT_ID = await fetchProjectId();
@@ -195,7 +176,6 @@ test.beforeAll(async () => {
 
   await fetchTestCases(moduleId);
 
-  // If cycleId & suiteId already exist (from previous run in memory), reuse them
   if (cycleId && suiteId) {
     console.log('Using existing cycle and suite.');
   } else {

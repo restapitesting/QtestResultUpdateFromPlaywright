@@ -34,7 +34,6 @@ function getAustraliaTimeISO() {
   return `${year}-${month}-${day}T${timePart}`;
 }
 
-// Persistent storage file
 const hierarchyFile = 'qtest-hierarchy.json';
 
 let PROJECT_ID: number;
@@ -45,7 +44,6 @@ let suiteId: number;
 let runId: number;
 let testCaseMap: Map<string, number> = new Map();
 
-// ------------------- API Helpers -------------------
 
 async function fetchProjectId(): Promise<number> {
   const res = await axios.get(`${QTEST_BASE_URL}/api/v3/projects`, { headers });
@@ -94,34 +92,22 @@ async function createTestSuite(cycleId: number): Promise<number> {
   return res.data.id;
 }
 
-// async function createTestRun(suiteId: number, testCaseId: number, title: string) {
-//   const res = await axios.post(
-//     `${QTEST_BASE_URL}/api/v3/projects/${PROJECT_ID}/test-runs?parentId=${suiteId}&parentType=test-suite`,
-//     { name: `Playwright Run - ${title}`, test_case: { id: testCaseId } },
-//     { headers }
-//   );
-//   return res.data.id;
-// }
 
 async function createTestRun(suiteId: number, testCaseId: number, title: string) {
-  // Fetch all runs in this suite
   const res = await axios.get(
     `${QTEST_BASE_URL}/api/v3/projects/${PROJECT_ID}/test-runs?parentType=test-suite&parentId=${suiteId}`,
     { headers }
   );
 
-  // Runs are inside res.data.items
   const runs = Array.isArray(res.data.items) ? res.data.items : [];
 
-  // Find existing run by name
   const existingRun = runs.filter((r: any) => r.name === `Playwright Run - ${title}`)[0];
 
   if (existingRun) {
     console.log(`Using existing test run for "${title}" with ID: ${existingRun.id}`);
-    return existingRun.id; // use existing
+    return existingRun.id;
   }
 
-  // No existing run, create a new one
   const createRes = await axios.post(
     `${QTEST_BASE_URL}/api/v3/projects/${PROJECT_ID}/test-runs?parentId=${suiteId}&parentType=test-suite`,
     { name: `Playwright Run - ${title}`, test_case: { id: testCaseId } },
@@ -146,11 +132,9 @@ async function createTestLog(runId: number, status: number, note = '') {
   );
 }
 
-// ------------------- Setup Logic -------------------
 async function ensureHierarchy() {
   let hierarchyExists = false;
 
-  // Load existing cycle & suite IDs if the file exists
   if (fs.existsSync(hierarchyFile)) {
     const data = JSON.parse(fs.readFileSync(hierarchyFile, 'utf-8'));
     cycleId = data.cycleId;
@@ -159,13 +143,11 @@ async function ensureHierarchy() {
     console.log('Using existing cycle & suite from file.');
   }
 
-  // Always fetch project, release, module & test cases
   PROJECT_ID = await fetchProjectId();
   RELEASE_ID = await fetchReleaseId(PROJECT_ID);
   moduleId = await fetchModuleId(PROJECT_ID);
   await fetchTestCases(moduleId);
 
-  // Only create new cycle & suite if they didn't exist
   if (!hierarchyExists) {
     cycleId = await createTestCycle();
     suiteId = await createTestSuite(cycleId);
@@ -175,18 +157,11 @@ async function ensureHierarchy() {
 }
 
 
-// ------------------- Test Hooks -------------------
 
 test.beforeAll(async () => {
   await ensureHierarchy();
 });
 
-/* test.afterAll(async () => {
-  if (fs.existsSync(hierarchyFile)) {
-    fs.unlinkSync(hierarchyFile); // Deletes the file
-    console.log('Deleted qtest-hierarchy.json after test execution.');
-  }
-}); */
 
 test.beforeEach(async ({}, testInfo) => {
   const testCaseId = testCaseMap.get(testInfo.title);
