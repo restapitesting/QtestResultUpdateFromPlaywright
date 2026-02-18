@@ -20,6 +20,7 @@ export default defineConfig({
   expect: {
     timeout: 2 * 6 * 1000
   },
+  
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -44,9 +45,10 @@ export default defineConfig({
     trace: 'on',
     video:'on',
     screenshot: 'on',
-    headless : false,
+    headless : true,
     testIdAttribute: 'autocomplete',
   },
+  
 
   /* Configure projects for major browsers */
   projects: [
