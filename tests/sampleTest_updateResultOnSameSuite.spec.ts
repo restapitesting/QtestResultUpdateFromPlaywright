@@ -11,6 +11,7 @@ const PROJECT_NAME = process.env.QTEST_PROJECT_NAME!;
 const RELEASE_NAME = process.env.QTEST_RELEASE_NAME!;
 const MODULE_NAME = process.env.MODULE_NAME!;
 
+
 const headers = {
   Authorization: `Bearer ${TOKEN}`,
   'Content-Type': 'application/json'
@@ -182,7 +183,7 @@ test.afterEach(async ({}, testInfo) => {
 test.describe.configure({ mode: 'parallel' });
 test.describe('Sample test cases', () => {
 
-  test.only('Login with valid credentials', async ({ page }) => {
+  test('Login with valid credentials', async ({ page }) => {
     const loginpage = new LoginPage(page);
     await loginpage.goto();
     await loginpage.login(process.env.USER_NAME!, process.env.PASSWORD!);

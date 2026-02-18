@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "testNew": "npx playwright test sampleTest_updateResultOnNewSuite.spec.ts --workers=1",
-    "testSame": "npx playwright test sampleTest_updateResultOnSameSuite.spec.ts --workers=1",
+    "test": "npx playwright test sampleTest_updateResultOnSameSuite.spec.ts --workers=1",
     "uitest":"npx playwright test --ui"
   },
   "keywords": [],

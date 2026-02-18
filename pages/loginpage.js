@@ -14,6 +14,8 @@ exports.LoginPage = class LoginPage {
 
     async goto() {
         await this.page.setViewportSize({ width: 1366, height: 728 })
+        await console.log(process.env.URL);
+        
         await this.page.goto(process.env.URL);
     }
 
