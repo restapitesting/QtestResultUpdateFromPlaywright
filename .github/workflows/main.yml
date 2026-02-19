@@ -29,7 +29,7 @@ jobs:
 
       - name: Run Playwright Tests
         run: npm run test
-        continue-on-error: true   # 👈 This allows workflow to continue even if tests fail
+        continue-on-error: true   # 👈 This allows workflow to conti even if tests fail
 
 
       - name: Upload Playwright Report
