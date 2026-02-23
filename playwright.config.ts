@@ -35,7 +35,7 @@ export default defineConfig({
   reporter:[
     ['html'],
    // ['allure-playwright'],
-    ['junit', { outputFile: 'test-results\e2e-junit-results.xml' }],
+    ['junit', { outputFile: 'test-results/e2e-junit-results.xml' }],
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
