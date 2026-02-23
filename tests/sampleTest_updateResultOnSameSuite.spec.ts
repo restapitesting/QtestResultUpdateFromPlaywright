@@ -183,7 +183,7 @@ import testData from '../test-data/credentials.json';
 test.describe.configure({ mode: 'parallel' });
 test.describe('Sample test cases', () => {
 
-  test('Login with valid credentials', async ({ page }) => {
+  test('TC-1 Login with valid credentials', async ({ page }) => {
     console.log("First Testcase passed");
     // const loginpage = new LoginPage(page);
     // await loginpage.goto();
@@ -192,7 +192,7 @@ test.describe('Sample test cases', () => {
     // await homepage.verifyHomePage();
   });
 
-  test('Login with Invalid Username', async ({ page }) => {
+  test('TC-3 Login with Invalid Username', async ({ page }) => {
   //  const loginpage = new LoginPage(page);
   //   await loginpage.goto();
   //   const username = testData.credentials[0].invalidUsername;
@@ -203,7 +203,7 @@ test.describe('Sample test cases', () => {
    console.log("Login with Invalid Username")
   });
 
-  test('Login with invalid Password', async ({ page }) => {
+  test('TC-4 Login with invalid Password', async ({ page }) => {
     // const loginpage = new LoginPage(page);
     // await loginpage.goto();
     // const password = testData.credentials[1].invalidPassword;
@@ -214,7 +214,7 @@ test.describe('Sample test cases', () => {
     console.log("Login with Invalid Password")
   });
 
-  test('Login with Invalid credentials', async ({ page }) => {
+  test('TC-5 Login with Invalid credentials', async ({ page }) => {
     // const loginpage = new LoginPage(page);
     // await loginpage.goto();
     // const username = testData.credentials[2].invalid?.username;
