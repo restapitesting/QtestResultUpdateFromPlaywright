@@ -21,6 +21,7 @@ export default defineConfig({
     timeout: 2 * 6 * 1000
   },
   
+  
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -34,7 +35,7 @@ export default defineConfig({
   reporter:[
     ['html'],
    // ['allure-playwright'],
-    ['junit', { outputFile: 'test-results/e2e-junit-results.xml' }],
+    ['junit', { outputFile: 'results.xml' }],
   ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
