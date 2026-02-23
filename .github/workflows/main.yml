@@ -27,8 +27,8 @@ jobs:
       - name: Run Playwright Tests (Generate JUnit)
         run: npx playwright test
 
-      - name: Debug - List Files
-        run: ls -R
+      # - name: Debug - List Files
+      #   run: ls -R
 
       - name: Upload JUnit Artifact
         uses: actions/upload-artifact@v4
