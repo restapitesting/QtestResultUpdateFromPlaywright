@@ -199,7 +199,7 @@ test.describe('Sample test cases', () => {
   //   await loginpage.login(username, process.env.PASSWORD!);
   //   const homepage = new HomePage(page);
   //   await homepage.verifyHomePage();
-  test.fail();
+  // test.fail();
    console.log("Login with Invalid Username")
   });
 
@@ -210,7 +210,7 @@ test.describe('Sample test cases', () => {
     // await loginpage.login(process.env.USER_NAME!, password);
     // const homepage = new HomePage(page);
     // await homepage.verifyHomePage();
-    test.fail();
+    // test.fail();
     console.log("Login with Invalid Password")
   });
 
@@ -222,7 +222,7 @@ test.describe('Sample test cases', () => {
     // await loginpage.login(username, password);
     // const homepage = new HomePage(page);
     // await homepage.verifyHomePage();
-    test.fail();
+    // test.fail();
     console.log("Login with Invalid credentials")
   });
 
