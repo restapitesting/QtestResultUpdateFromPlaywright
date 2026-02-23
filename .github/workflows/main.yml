@@ -41,7 +41,7 @@ jobs:
         run: |
               JSON_PAYLOAD=$(jq -Rs '{ junit: . }' test-results/e2e-junit-results.xml)
               curl -X POST https://pulse-8.qtestnet.com/webhook/19ffba06-a8ce-4c04-a38c-6841441cb0e6 \
-              -H "Authorization: "Bearer c51e9132-ea8f-4f5a-890c-a189537945bf" \
+              -H "Authorization: Bearer c51e9132-ea8f-4f5a-890c-a189537945bf" \
               -H "Content-Type: application/json" \
               -d "$JSON_PAYLOAD"
 
