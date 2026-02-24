@@ -1,0 +1,202 @@
+Playwrite Framework integration steps 
+
+1. Name of the Playwrite test should be same as qtest test Name
+2. Create a WebHook[Trigger] in Qtest-pulse
+
+  EF : https://pulse-8.qtestnet.com/webhook/2b78eaab-d9f1-4bc0-aa76-e08de199a8cb
+
+3.Update the Playwrite.config File (add a code to generate the junit test reports)
+      reporter:[
+    ['html'],
+   // ['allure-playwright'],
+    ['junit', { outputFile: 'test-results/e2e-junit-results.xml' }],
+  ],
+
+4. Udate the GitLab WorkFlow File to get the Junit Reports and Invoke the Pluse WebBook and Junit report as a Payload
+         - name: Run Playwright Tests (Generate JUnit)
+        run: npx playwright test
+
+
+      - name: Upload JUnit Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-results
+          path: test-results/e2e-junit-results.xml
+
+      - name: Send JUnit XML to qTest Plus
+        if: always()
+        run: |
+              JSON_PAYLOAD=$(jq -Rs '{ junit: . }' test-results/e2e-junit-results.xml)
+              curl -X POST https://pulse-8.qtestnet.com/webhook/19ffba06-a8ce-4c04-a38c-6841441cb0e6 \
+              -H "Authorization: Bearer c51e9132-ea8f-4f5a-890c-fdfdfgdff" \
+              -H "Content-Type: application/json" \
+              -d "$JSON_PAYLOAD"
+
+  Note-1 : get the WebHook from the Pulse
+  Note-2 : get the API Token From Qtest-> Resourse->API & SDK -> Copy the Token 
+          Eg : Bearer c51e9132-ea8f-4f5a-890c-a18953794fdf
+
+5. Add Action in Qtest-Pulse
+
+     var PulseSdk = require('@qasymphony/pulse-sdk');
+var axios = require('axios');
+var xml2js = require('xml2js');
+
+exports.handler = async function(args, context, callback) {
+    const event = args.event;
+    const constants = args.constants;
+
+    if (!event || !event.junit) {
+        callback("No JUnit XML received from GitHub.");
+        return;
+    }
+
+    const parser = new xml2js.Parser();
+    const TOKEN = constants.qtestToken;
+    const PROJECT_NAME = constants.projectName;
+    const RELEASE_NAME = constants.releaseName;
+    const MODULE_NAME = constants.moduleName;
+    const BASE_URL = constants.qtestBaseUrl + "/api/v3/projects";
+
+    const HEADERS = {
+        Authorization: `Bearer ${TOKEN}`,
+        "Content-Type": "application/json"
+    };
+
+    function mapStatus(status) {
+        switch (status.toUpperCase()) {
+            case 'PASSED': return 601;
+            case 'FAILED': return 602;
+            case 'SKIPPED': return 605;
+            case 'TIMEDOUT': return 604;
+            default: return 602;
+        }
+    }
+
+    function normalizeName(name) {
+        return name.replace(/\s+/g, ' ').trim().toLowerCase();
+    }
+
+    function getAustraliaTimeISO() {
+        // Ensures proper ISO format without locale quirks
+        const date = new Date();
+        const tzOffset = -420; // Sydney UTC+10 (adjust for DST if needed)
+        const tzDate = new Date(date.getTime() + tzOffset * 60000);
+        return tzDate.toISOString().split('.')[0];
+    }
+
+    try {
+        // ----------------- Parse JUnit XML -----------------
+        const result = await parser.parseStringPromise(event.junit);
+        let junitTests = [];
+        if (result.testsuite && result.testsuite.testcase) {
+            junitTests = result.testsuite.testcase;
+        } else if (result.testsuites && result.testsuites.testsuite.length > 0 && result.testsuites.testsuite[0].testcase) {
+            junitTests = result.testsuites.testsuite[0].testcase;
+        }
+
+        if (junitTests.length === 0) throw new Error("No test cases found in JUnit XML.");
+
+        // ----------------- Fetch Project -----------------
+        const projectsRes = await axios.get(`${BASE_URL}`, { headers: HEADERS });
+        const project = projectsRes.data.find(p => p.name === PROJECT_NAME);
+        if (!project) throw new Error(`Project "${PROJECT_NAME}" not found`);
+        const PROJECT_ID = project.id;
+
+        // ----------------- Fetch Release -----------------
+        const releasesRes = await axios.get(`${BASE_URL}/${PROJECT_ID}/releases`, { headers: HEADERS });
+        const release = releasesRes.data.find(r => r.name === RELEASE_NAME);
+        if (!release) throw new Error(`Release "${RELEASE_NAME}" not found`);
+        const RELEASE_ID = release.id;
+
+        // ----------------- Fetch Module -----------------
+        const modulesRes = await axios.get(`${BASE_URL}/${PROJECT_ID}/modules`, { headers: HEADERS });
+        const module = modulesRes.data.find(m => m.name === MODULE_NAME);
+        if (!module) throw new Error(`Module "${MODULE_NAME}" not found`);
+        const MODULE_ID = module.id;
+
+        // ----------------- Fetch Test Cases -----------------
+        const testCasesRes = await axios.get(`${BASE_URL}/${PROJECT_ID}/test-cases?parentId=${MODULE_ID}&expandSteps=true`, { headers: HEADERS });
+        const testCaseMap = new Map();
+        testCasesRes.data.forEach(tc => testCaseMap.set(normalizeName(tc.name), tc.id));
+
+        // ----------------- Create NEW Test Cycle -----------------
+        const cycleRes = await axios.post(
+            `${BASE_URL}/${PROJECT_ID}/test-cycles`,
+            { name: `Auto Cycle - ${getAustraliaTimeISO()}`, parentId: RELEASE_ID, parentType: "release" },
+            { headers: HEADERS }
+        );
+        const CYCLE_ID = cycleRes.data.id;
+
+// ----------------- Create Suite inside Cycle -----------------
+            const suiteRes = await axios.post(
+            `${BASE_URL}/${PROJECT_ID}/test-suites?parentId=${CYCLE_ID}&parentType=test-cycle`,
+            { 
+                name: `Auto Suite - ${getAustraliaTimeISO()}`
+            },
+            { headers: HEADERS }
+            );
+
+            const SUITE_ID = suiteRes.data.id;
+
+        // ----------------- Process Each JUnit Test -----------------
+        for (let tc of junitTests) {
+            let testName = tc.$.name;
+            if (testName.includes("›")) testName = testName.split("›")[1].trim();
+            if (testName.startsWith("Playwright Run - ")) testName = testName.replace("Playwright Run - ", "").trim();
+
+            const testCaseId = testCaseMap.get(normalizeName(testName));
+            if (!testCaseId) {
+                console.warn(`Test case "${testName}" not found in qTest. Skipping.`);
+                continue;
+            }
+
+            const duration = tc.$.time ? parseFloat(tc.$.time) * 1000 : 0;
+            const statusText = tc.failure ? "FAILED" : (tc.skipped ? "SKIPPED" : "PASSED");
+            const note = tc.failure ? tc.failure[0]._ || "Failure occurred" : "Executed via Playwright";
+            const statusId = mapStatus(statusText);
+
+            // ----------------- Create Test Run -----------------
+            const runPayload = {
+                name: `Playwright Run - ${testName}`,
+                parentId: SUITE_ID,
+                parentType: "test-suite",
+                test_case: { id: testCaseId }
+            };
+
+            let runRes;
+            try {
+                runRes = await axios.post(`${BASE_URL}/${PROJECT_ID}/test-runs`, runPayload, { headers: HEADERS });
+            } catch (err) {
+                console.error("Error creating test run:", runPayload, err.response.data || err);
+                continue;
+            }
+
+            const runId = runRes.data.id;
+
+            // ----------------- Push Test Log -----------------
+            const logPayload = {
+                status: { id: statusId },
+                exe_start_date: getAustraliaTimeISO(),
+                exe_end_date: getAustraliaTimeISO(),
+                execution_time: duration,
+                note: note,
+                automation_content: "Playwright"
+            };
+
+            try {
+                await axios.post(`${BASE_URL}/${PROJECT_ID}/test-runs/${runId}/test-logs`, logPayload, { headers: HEADERS });
+            } catch (err) {
+                console.error("Error posting test log:", logPayload, err.response.data || err);
+            }
+        }
+
+        callback(null, "Playwright results successfully updated to qTest.");
+    } catch (error) {
+        console.error("Error during qTest processing:", error.response.data || error);
+        callback(error);
+    }
+};
+
+
+  
