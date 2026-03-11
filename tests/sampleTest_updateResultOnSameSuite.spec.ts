@@ -16,6 +16,7 @@ test.describe('Sample test cases', () => {
     console.log("First Testcase passed");
     console.log("test results back to Qtest");
      console.log("test results back to Qtest");
+     console.log("test results back to Qtest");
     
     // const loginpage = new LoginPage(page);
     // await loginpage.goto();
