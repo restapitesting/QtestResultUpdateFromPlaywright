@@ -15,6 +15,7 @@ test.describe('Sample test cases', () => {
   test('Login with valid credentials', async ({ page }) => {
     console.log("First Testcase passed");
     console.log("test results back to Qtest");
+     console.log("test results back to Qtest");
     
     // const loginpage = new LoginPage(page);
     // await loginpage.goto();
