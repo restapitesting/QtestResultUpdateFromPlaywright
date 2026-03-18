@@ -24,6 +24,7 @@ test.describe('Sample test cases', () => {
     // const homepage = new HomePage(page);
     // await homepage.verifyHomePage();  
      console.log("test")
+       console.log("test2")
   });
 
   test('Login with Invalid Username', async ({ page }) => {
