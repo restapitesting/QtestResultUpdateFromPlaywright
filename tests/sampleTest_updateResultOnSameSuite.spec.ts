@@ -22,7 +22,8 @@ test.describe('Sample test cases', () => {
     // await loginpage.goto();
     // await loginpage.login(process.env.USER_NAME!, process.env.PASSWORD!);
     // const homepage = new HomePage(page);
-    // await homepage.verifyHomePage();
+    // await homepage.verifyHomePage();  
+     console.log("test")
   });
 
   test('Login with Invalid Username', async ({ page }) => {
