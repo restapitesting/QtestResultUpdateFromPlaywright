@@ -25,6 +25,8 @@ test.describe('Sample test cases', () => {
     // await homepage.verifyHomePage();  
      console.log("test")
        console.log("test2")
+        console.log("test3")
+
   });
 
   test('Login with Invalid Username', async ({ page }) => {
