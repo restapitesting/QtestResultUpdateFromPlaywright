@@ -27,21 +27,25 @@ test.describe('Sample test cases', () => {
        console.log("test2")
         console.log("test3")
          console.log("test4")
+          console.log("test5")
 
   });
 
   test('Login with Invalid Username', async ({ page }) => {
-    test.fail();
+    //test.fail();
    console.log("Login with Invalid Username")
+   console.log("test5")
   });
 
   test('Login with invalid Password', async ({ page }) => {
     console.log("Login with Invalid Password")
+     console.log("test6")
   });
 
   test('Login with Invalid credentials', async ({ page }) => {
     // test.fail();
     console.log("Login with Invalid credentials")
+     console.log("test7")
   });
 
 });
